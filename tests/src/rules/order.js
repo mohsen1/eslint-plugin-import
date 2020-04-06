@@ -130,14 +130,23 @@ ruleTester.run('order', rule, {
     // Grouping import types
     test({
       code: `
-        var fs = require('fs');
-        var index = require('./');
-        var path = require('path');
+        import execa from 'execa'
 
-        var sibling = require('./foo');
-        var relParent3 = require('../');
-        var async = require('async');
-        var relParent1 = require('../foo');
+        import { getPaths } from 'src/lib'
+
+        export const command = 'lint'
+        export const desc = 'Lint your files.'
+        export const builder = {
+          fix: { type: 'boolean', default: false },
+        }
+
+        export const handler = ({ fix }) => {
+          execa('yarn eslint', [fix && '--fix', 'web/src', 'api/src'].filter(Boolean), {
+            cwd: getPaths().base,
+            shell: true,
+            stdio: 'inherit',
+          })
+        }
       `.split('\n').join(os.EOL),
       options: [{groups: [
         ['builtin', 'index'],
